@@ -1,33 +1,40 @@
-import { useRouter } from "next/router"
-import EventContent from "../../components/event-detail/event-content";
-import EventLogistics from "../../components/event-detail/event-logistics";
-import EventSummary from "../../components/event-detail/event-summary";
-import EventDetails from "../../components/event-details/event-details";
-import { getEventById } from "../../dummy-data";
+import { Fragment } from 'react';
+import { useRouter } from 'next/router';
 
-const EventDetail = () => {
-    const router = useRouter();
-    const eventId =  router.query.eventId;
-    const event = getEventById(eventId);
+import { getEventById } from '../../dummy-data';
+import EventSummary from '../../components/event-detail/event-summary';
+import EventLogistics from '../../components/event-detail/event-logistics';
+import EventContent from '../../components/event-detail/event-content';
+import ErrorAlert from '../../components/ui/error-alert';
 
-    if (!event) {
-        return <h1>No event with this ID</h1>
-    }
+function EventDetailPage() {
+  const router = useRouter();
 
+  const eventId = router.query.eventId;
+  const event = getEventById(eventId);
+
+  if (!event) {
     return (
-        <>
-            <EventSummary title={event.title}/>
-            <EventLogistics 
-                date={event.date}
-                address={event.location}
-                image={event.image}
-                imageAlt={event.title}
-            />
-            <EventContent>
-                {event.description}
-            </EventContent>
-        </>
-    )
+      <ErrorAlert>
+        <p>No event found!</p>
+      </ErrorAlert>
+    );
+  }
+
+  return (
+    <Fragment>
+      <EventSummary title={event.title} />
+      <EventLogistics
+        date={event.date}
+        address={event.location}
+        image={event.image}
+        imageAlt={event.title}
+      />
+      <EventContent>
+        <p>{event.description}</p>
+      </EventContent>
+    </Fragment>
+  );
 }
 
-export default EventDetail;
+export default EventDetailPage;

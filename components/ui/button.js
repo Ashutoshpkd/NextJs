@@ -1,4 +1,4 @@
-import classes from '../../styles/button.module.css';
+import classes from './button.module.css';
 import { useRouter } from 'next/router';
 
 const Button = (props) => {
