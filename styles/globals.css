@@ -31,3 +31,35 @@ ul {
   margin: auto;
   text-align: center;
 }
+
+.swipe-down-drawer {
+  position: relative;
+  height: 100%;
+}
+
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background-color: lightgray;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  overflow-y: auto;
+  transition: height 0.3s ease;
+}
+
+.drawer.open {
+  height: 100%;
+}
