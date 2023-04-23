@@ -1,32 +1,64 @@
-import { MongoClient } from 'mongodb';
+import {
+  connectDatabase,
+  insertDocument,
+  getAllDocuments,
+} from '../../../helpers/db-util';
+
 async function handler(req, res) {
-    const uri = `mongodb+srv://ashutoshpkd:naruto@rest-api.qmaic7m.mongodb.net/nextjs?retryWrites=true&w=majority`;
-    const { eventId } = req.query;
-    console.log('Req started for eventId - ', eventId, req.method);
-    if (req.method === 'POST') {
-        const comment = JSON.parse(req.body);
-        const client = await MongoClient.connect(uri);
-        const db = client.db();
-        const savedCommentId = await db.collection('comments').insertOne(comment);
-        client.close();
-        console.log('Comment saved  to db success - ', savedCommentId.insertedId);
-        res.status(201).json({id: savedCommentId.insertedId, ...comment });
-    } else if (req.method === 'GET') {
-        const comments = [
-            {
-                id: 'c1',
-                name: 'Ashutosh',
-                text: 'My first comment',
-            },
-            {
-                id: 'c2',
-                name: 'Ashu',
-                text: 'My second comment',
-            }
-        ];
-        console.log('Req completed for fetching comments - ', comments);
-        res.status(200).json(comments);
+  const eventId = req.query.eventId;
+
+  let client;
+
+  try {
+    client = await connectDatabase();
+  } catch (error) {
+    res.status(500).json({ message: 'Connecting to the database failed!' });
+    return;
+  }
+
+  if (req.method === 'POST') {
+    const { email, name, text } = req.body;
+
+    if (
+      !email.includes('@') ||
+      !name ||
+      name.trim() === '' ||
+      !text ||
+      text.trim() === ''
+    ) {
+      res.status(422).json({ message: 'Invalid input.' });
+      client.close();
+      return;
     }
-};
+
+    const newComment = {
+      email,
+      name,
+      text,
+      eventId,
+    };
+
+    let result;
+
+    try {
+      result = await insertDocument(client, 'comments', newComment);
+      newComment._id = result.insertedId;
+      res.status(201).json({ message: 'Added comment.', comment: newComment });
+    } catch (error) {
+      res.status(500).json({ message: 'Inserting comment failed!' });
+    }
+  }
+
+  if (req.method === 'GET') {
+    try {
+      const documents = await getAllDocuments(client, 'comments', { _id: -1 });
+      res.status(200).json({ comments: documents });
+    } catch (error) {
+      res.status(500).json({ message: 'Getting comments failed.' });
+    }
+  }
+
+  client.close();
+}
 
 export default handler;
